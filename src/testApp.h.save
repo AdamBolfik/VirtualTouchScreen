@@ -21,25 +21,35 @@ public:
 	void windowResized(int w, int h);
 
 	ofxKinect kinect;
-
-	ofxCvColorImage colorImg;
-	ofImage selectedImg;
-	ofxCvGrayscaleImage grayImage1, // grayscale depth image
-                        grayImage2, // grayscale depth image
-                        grayThreshNear, // the near thresholded image
-                        grayThreshMid1, // the mid thresholded image
-                        grayThreshMid2, // the mid thresholded image
-                        grayThreshFar; // the far thresholded image
-	ofxCvContourFinder contourFinder,
-                       contourFinder2;
 	ofEasyCam easyCam; // used for viewing the point cloud
 
-    //GUI
-	ofxIntSlider threshSlider1,
-                 threshSlider2;
-	ofxPanel gui;
+    ofImage selectedImg,
+            selectedNearImg,
+            selectedFarImg;
+	ofxCvColorImage colorImg;
+	ofxCvGrayscaleImage cvGrayImage1, // grayscale depth image
+                        cvGrayImage2, // grayscale depth image
+                        cvGrayThreshNear, // the near thresholded image
+                        cvGrayThreshMid1, // the mid thresholded image
+                        cvGrayThreshMid2, // the mid thresholded image
+                        cvGrayThreshFar, // the far thresholded image
+                        cvGrayBg,
+                        cvSelectedNearImg,
+                        cvSelectedFarImg,
+                        cvSubtractedImg;
+	ofxCvContourFinder contourFinder1,
+                       contourFinder2,
+                    
 
-	bool bDrawPointCloud;
+    //GUI
+    ofxPanel gui;
+	ofxIntSlider threshSlider1,
+                 threshSlider2,
+                 maxSizeSlider,
+                 minSizeSlider;
+
+	bool bDrawPointCloud,
+         getNewBg;
 	int angle;
 
 	vector<ofVec2f> corners;

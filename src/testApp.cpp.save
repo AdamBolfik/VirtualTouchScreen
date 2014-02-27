@@ -10,29 +10,34 @@ void testApp::setup() {
 	kinect.init();
 	kinect.open();
 
+    // get space for all of the images
 	colorImg.allocate(kinect.width, kinect.height);
-	grayImage1.allocate(kinect.width, kinect.height);
-	grayImage2.allocate(kinect.width, kinect.height);
-	grayThreshNear.allocate(kinect.width, kinect.height);
-	grayThreshMid1.allocate(kinect.width, kinect.height);
-	grayThreshMid2.allocate(kinect.width, kinect.height);
-	grayThreshFar.allocate(kinect.width, kinect.height);
+	cvGrayImage1.allocate(kinect.width, kinect.height);
+	cvGrayImage2.allocate(kinect.width, kinect.height);
+	cvGrayThreshNear.allocate(kinect.width, kinect.height);
+	cvGrayThreshMid1.allocate(kinect.width, kinect.height);
+	cvGrayThreshMid2.allocate(kinect.width, kinect.height);
+	cvGrayThreshFar.allocate(kinect.width, kinect.height);
+	cvGrayBg.allocate(kinect.width, kinect.height);
 
-	//ofSetFrameRate(60);
+//	ofSetFrameRate(60);
 
 	// zero the tilt on startup
 	angle = 0;
 	kinect.setCameraTiltAngle(angle);
 
-	// start from the front
 	bDrawPointCloud = false;
+	getNewBg = true;
 
 	ofSetWindowShape(kinect.width * 2, kinect.height * 2);
 
 	// GUI
     gui.setup();
-    gui.add(threshSlider1.setup("Thresh 1", 181, 0, 255));
-    gui.add(threshSlider2.setup("Thresh 2", 170, 0, 255));
+//    gui.add(threshSlider1.setup("Thresh 1", 177, 0, 255));
+//    gui.add(threshSlider2.setup("Thresh 2", 168, 0, 255));
+    gui.add(threshSlider1.setup("ThreshHold", 200, 0, 255));
+    gui.add(maxSizeSlider.setup("Max Size", 4000, 300, kinect.width*kinect.height/4));
+    gui.add(minSizeSlider.setup("Min Size", 100, 10, 300));
 }
 
 //--------------------------------------------------------------
@@ -42,42 +47,58 @@ void testApp::update() {
 
 	kinect.update();
 	// there is a new frame and we are connected
+	if(getNewBg){
+        cvGrayBg.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
+        getNewBg = false;
+	}
 	if(kinect.isFrameNew()) {
-
 		// load grayscale depth image from the kinect source
-		grayImage1.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
+		cvGrayImage1.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
 
+        cvGrayThreshNear = cvGrayImage1;
+        cvGrayThreshMid1 = cvGrayImage1;
+        cvGrayThreshMid2 = cvGrayImage1;
+        cvGrayThreshFar = cvGrayImage1;
+
+        cvGrayThreshNear.threshold(threshSlider1, true);
+        cvGrayThreshMid1.threshold(threshSlider1 - 5);
+        cvGrayThreshMid2.threshold(threshSlider1 - 6, true);
+        cvGrayThreshFar.threshold(threshSlider1 - 11);
+        cvAnd(cvGrayThreshNear.getCvImage(), cvGrayThreshMid1.getCvImage(), cvGrayImage1.getCvImage(), NULL);
+        cvAnd(cvGrayThreshMid2.getCvImage(), cvGrayThreshFar.getCvImage(), cvGrayImage2.getCvImage(), NULL);
+
+        // allocate ofImg, set ofImg from cvImg, crop ofImg, change to cvimage
         if(corners.size() == 2){
-            //selectedImg.allocate(kinect.width, kinect.height);
-            selectedImg.setFromPixels(kinect.getPixels(), kinect.width, kinect.height, OF_IMAGE_COLOR);
-            selectedImg.crop(corners[0].x, corners[0].y, corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+//            selectedImg.allocate(kinect.width, kinect.height);
+//            selectedImg.setFromPixels(kinect.getPixels(), kinect.width, kinect.height, OF_IMAGE_COLOR);
+//            selectedImg.crop(corners[0].x, corners[0].y, corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+            // Near Image
+            selectedNearImg.allocate(cvGrayImage1.width, cvGrayImage1.height, OF_IMAGE_GRAYSCALE);
+            selectedNearImg.setFromPixels(cvGrayImage1.getPixels(), cvGrayImage1.width, cvGrayImage1.height, OF_IMAGE_GRAYSCALE);
+            selectedNearImg.crop(corners[0].x, corners[0].y, corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+            cvSelectedNearImg.setFromPixels(selectedNearImg.getPixels(), corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+            // Far Image
+            selectedFarImg.allocate(cvGrayImage2.width, cvGrayImage2.height, OF_IMAGE_GRAYSCALE);
+            selectedFarImg.setFromPixels(cvGrayImage2.getPixels(), cvGrayImage2.width, cvGrayImage2.height, OF_IMAGE_GRAYSCALE);
+            selectedFarImg.crop(corners[0].x, corners[0].y, corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+            cvSelectedFarImg.setFromPixels(selectedFarImg.getPixels(), corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+
+            cvSubtractedImg.allocate(cvSelectedFarImg.getWidth(), cvGrayImage1.height);
+            cvSubtractedImg.absDiff(cvSelectedNearImg, cvSelectedFarImg);
+
+            // find contours which are between the size of 20 pixels and 1/3 the w*h pixels.
+            // also, find holes is set to true so we will get interior contours as well....
+            contourFinder1.findContours(cvSelectedNearImg, minSizeSlider, maxSizeSlider, 2, false);
+            contourFinder2.findContours(cvSelectedFarImg, minSizeSlider, maxSizeSlider, 2, false);
+            contourFinder3.findContours(cvSubtractedImg, minSizeSlider, maxSizeSlider, 2, false);
         }
 
-		// we do two thresholds - one for the far plane and one for the near plane
-		// we then do a cvAnd to get the pixels which are a union of the two thresholds
-
-        grayThreshNear = grayImage1;
-        grayThreshMid1 = grayImage1;
-        grayThreshMid2 = grayImage1;
-        grayThreshFar = grayImage1;
-        grayThreshNear.threshold(threshSlider1, true);
-        grayThreshMid1.threshold(threshSlider1 - 5);
-        grayThreshMid2.threshold(threshSlider2, true);
-        grayThreshFar.threshold(threshSlider2 - 5);
-        cvAnd(grayThreshNear.getCvImage(), grayThreshMid1.getCvImage(), grayImage1.getCvImage(), NULL);
-        cvAnd(grayThreshMid2.getCvImage(), grayThreshFar.getCvImage(), grayImage2.getCvImage(), NULL);
-
 		// update the cv images
-		grayImage1.flagImageChanged();
-		grayImage2.flagImageChanged();
+		cvGrayImage1.flagImageChanged();
+		cvGrayImage2.flagImageChanged();
         // Dilate
-        grayImage1.dilate_3x3();
-        grayImage2.dilate_3x3();
-
-		// find contours which are between the size of 20 pixels and 1/3 the w*h pixels.
-		// also, find holes is set to true so we will get interior contours as well....
-		contourFinder1.findContours(grayImage1, 50, (kinect.width*kinect.height)/2, 5, false);
-		contourFinder2.findContours(grayImage2, 50, (kinect.width*kinect.height)/2, 5, false);
+//        grayImage1.dilate_3x3();
+//        grayImage2.dilate_3x3();
 	}
 }
 
@@ -92,19 +113,22 @@ void testApp::draw() {
 		easyCam.end();
 	} else {
 		// draw from the live kinect
-		grayImage1.draw(0, 0);
-        grayImage2.draw(kinect.width, 0);
-        kinect.draw(kinect.width, kinect.height);
-		contourFinder1.draw(kinect.width, 0);
-		contourFinder2.draw(kinect.width, 0);
-		//kinect.drawDepth(kinect.width, 0, 400, 300);
+		cvGrayImage1.draw(0, 0);
+        cvGrayImage2.draw(kinect.width, 0);
+//        kinect.draw(kinect.width, kinect.height);
+//		  kinect.drawDepth(kinect.width, 0, 400, 300);
 
 		// if two points are selected, draw a rectangle
         if(corners.size() == 2){
             ofNoFill();
-            //ofSetColor(0, 255, 255, 50);
             ofRect(corners[0].x, corners[0].y, corners[1].x - corners[0].x, corners[1].y - corners[0].y);
-            selectedImg.draw(kinect.width, 0);
+//            selectedImg.draw(kinect.width, 0);
+            cvSelectedNearImg.draw(0, kinect.height);
+            cvSelectedFarImg.draw(cvSelectedNearImg.width, kinect.height);
+            cvSubtractedImg.draw(cvSelectedNearImg.width * 2, kinect.height);
+            contourFinder1.draw(0, kinect.height);
+            contourFinder2.draw(cvSelectedNearImg.width, kinect.height);
+            contourFinder3.draw(cvSelectedNearImg.width * 2, kinect.height);
         }
 	}
 
@@ -113,22 +137,21 @@ void testApp::draw() {
 	ofLine(mousePt.x+10, mousePt.y, mousePt.x-10, mousePt.y);
 	ofLine(mousePt.x, mousePt.y+10, mousePt.x, mousePt.y-10);
 
-    // Values
-    stringstream reportStream;
-    reportStream << "sensor-emitter dist: " << kinect.getSensorEmitterDistance() << "cm" << endl
-	<< "sensor-camera dist:  " << kinect.getSensorCameraDistance() << "cm" << endl
-	<< "zero plane pixel size: " << kinect.getZeroPlanePixelSize() << "mm" << endl
-	<< "zero plane dist: " << kinect.getZeroPlaneDistance() << "mm" << endl
-	<< "fps: " << ofGetFrameRate() << endl;
+    // values printed to screen
+//    stringstream reportStream;
+//    reportStream << "sensor-emitter dist: " << kinect.getSensorEmitterDistance() << "cm" << endl
+//	<< "sensor-camera dist:  " << kinect.getSensorCameraDistance() << "cm" << endl
+//	<< "zero plane pixel size: " << kinect.getZeroPlanePixelSize() << "mm" << endl
+//	<< "zero plane dist: " << kinect.getZeroPlaneDistance() << "mm" << endl
+//	<< "fps: " << ofGetFrameRate() << endl;
+//    if(kinect.hasCamTiltControl()) {
+//    	reportStream << "press UP and DOWN to change the tilt angle: " << angle << " degrees" << endl
+//        << "press 1-5 & 0 to change the led mode" << endl;
+//    }
+//
+//	ofDrawBitmapString(reportStream.str(), 20, 500);
 
-    if(kinect.hasCamTiltControl()) {
-    	reportStream << "press UP and DOWN to change the tilt angle: " << angle << " degrees" << endl
-        << "press 1-5 & 0 to change the led mode" << endl;
-    }
-
-	ofDrawBitmapString(reportStream.str(), 20, 500);
-
-	//GUI
+	// GUI
 	gui.draw();
 }
 
@@ -168,46 +191,16 @@ void testApp::exit() {
 void testApp::keyPressed (int key) {
 	switch (key) {
 
+        case'r':
+            getNewBg = true; // get new background image
+            break;
+
 		case'p':
-			bDrawPointCloud = !bDrawPointCloud;
+			bDrawPointCloud = !bDrawPointCloud; // Draw the pointcloud
 			break;
 
 		case 'w':
 			kinect.enableDepthNearValueWhite(!kinect.isDepthNearValueWhite());
-			break;
-
-		case 'o':
-			kinect.setCameraTiltAngle(angle); // go back to prev tilt
-			kinect.open();
-			break;
-
-		case 'c':
-			kinect.setCameraTiltAngle(0); // zero the tilt
-			kinect.close();
-			break;
-
-		case '1':
-			kinect.setLed(ofxKinect::LED_GREEN);
-			break;
-
-		case '2':
-			kinect.setLed(ofxKinect::LED_YELLOW);
-			break;
-
-		case '3':
-			kinect.setLed(ofxKinect::LED_RED);
-			break;
-
-		case '4':
-			kinect.setLed(ofxKinect::LED_BLINK_GREEN);
-			break;
-
-		case '5':
-			kinect.setLed(ofxKinect::LED_BLINK_YELLOW_RED);
-			break;
-
-		case '0':
-			kinect.setLed(ofxKinect::LED_OFF);
 			break;
 
 		case OF_KEY_UP:
