@@ -54,5 +54,7 @@ public:
 
 	vector<ofVec2f> corners;
     ofVec2f mousePt;
+    ofVec3f centroid;
+    vector<ofPoint> gesture_lines;
     ofRectangle rect;
 };
