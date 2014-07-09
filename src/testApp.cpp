@@ -10,32 +10,48 @@ void testApp::setup() {
 	kinect.open();
 
     // get space for all of the images
-	colorImg.allocate(kinect.width, kinect.height);
 	cvGrayImage1.allocate(kinect.width, kinect.height);
 	cvGrayImage2.allocate(kinect.width, kinect.height);
-	cvGrayThreshNear.allocate(kinect.width, kinect.height);
-	cvGrayThreshMid1.allocate(kinect.width, kinect.height);
-	cvGrayThreshMid2.allocate(kinect.width, kinect.height);
-	cvGrayThreshFar.allocate(kinect.width, kinect.height);
-	cvGrayBg.allocate(kinect.width, kinect.height);
+	cvGrayImage3.allocate(kinect.width, kinect.height);
+	cvGrayImage4.allocate(kinect.width, kinect.height);
+	cvGrayImage5.allocate(kinect.width, kinect.height);
+	cvGrayImage6.allocate(kinect.width, kinect.height);
+	cvGrayThresh1.allocate(kinect.width, kinect.height);
+	cvGrayThresh2.allocate(kinect.width, kinect.height);
+	cvGrayThresh3.allocate(kinect.width, kinect.height);
+	cvGrayThresh4.allocate(kinect.width, kinect.height);
+	cvGrayThresh5.allocate(kinect.width, kinect.height);
+	cvGrayThresh6.allocate(kinect.width, kinect.height);
+	cvGrayThresh1F.allocate(kinect.width, kinect.height);
+	cvGrayThresh2F.allocate(kinect.width, kinect.height);
+	cvGrayThresh3F.allocate(kinect.width, kinect.height);
+	cvGrayThresh4F.allocate(kinect.width, kinect.height);
+	cvGrayThresh5F.allocate(kinect.width, kinect.height);
+	cvGrayThresh6F.allocate(kinect.width, kinect.height);
 
-//	ofSetFrameRate(60);
+
+	ofSetFrameRate(30);
 
 	// zero the tilt on startup
 	angle = 0;
 	kinect.setCameraTiltAngle(angle);
 
 	bDrawPointCloud = false;
-	getNewBg = true;
+	findWin = false;
+	drawSel = true;
 
-	ofSetWindowShape(kinect.width * 2, kinect.height * 2);
+	ofSetWindowShape(kinect.width + 200, kinect.height);
 
 	// GUI
     gui.setup();
-//    gui.add(threshSlider1.setup("Thresh 1", 177, 0, 255));
-//    gui.add(threshSlider2.setup("Thresh 2", 168, 0, 255));
-    gui.add(threshSlider1.setup("ThreshHold", 200, 0, 255));
-    gui.add(maxSizeSlider.setup("Max Size", 4000, 300, kinect.width*kinect.height/4));
+    gui.add(threshSlider1.setup("Thresh 1", 200, 0, 255));
+    gui.add(threshSlider2.setup("Thresh 2", 200, 0, 255));
+    gui.add(threshSlider3.setup("Thresh 3", 200, 0, 255));
+    gui.add(threshSlider4.setup("Thresh 4", 200, 0, 255));
+    gui.add(threshSlider5.setup("Thresh 5", 200, 0, 255));
+    gui.add(threshSlider6.setup("Thresh 6", 200, 0, 255));
+//    gui.add(maxSizeSlider.setup("Max Size", 4000, 300, kinect.width*kinect.height/4));
+    gui.add(maxSizeSlider.setup("Max Size", 2000, 300, 4000));
     gui.add(minSizeSlider.setup("Min Size", 100, 10, 300));
 }
 
@@ -46,65 +62,119 @@ void testApp::update() {
 
 	kinect.update();
 	// there is a new frame and we are connected
-	if(getNewBg){
-        cvGrayBg.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
-        getNewBg = false;
-	}
 	if(kinect.isFrameNew()) {
 		// load grayscale depth image from the kinect source
 		cvGrayImage1.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
 
-        cvGrayThreshNear = cvGrayImage1;
-        cvGrayThreshMid1 = cvGrayImage1;
-        cvGrayThreshMid2 = cvGrayImage1;
-        cvGrayThreshFar = cvGrayImage1;
+        // load a base picture into each image
+        cvGrayThresh1 = cvGrayImage1;
+        cvGrayThresh2 = cvGrayImage1;
+        cvGrayThresh3 = cvGrayImage1;
+        cvGrayThresh4 = cvGrayImage1;
+        cvGrayThresh5 = cvGrayImage1;
+        cvGrayThresh6 = cvGrayImage1;
+        cvGrayThresh1F = cvGrayImage1;
+        cvGrayThresh2F = cvGrayImage1;
+        cvGrayThresh3F = cvGrayImage1;
+        cvGrayThresh4F = cvGrayImage1;
+        cvGrayThresh5F = cvGrayImage1;
+        cvGrayThresh6F = cvGrayImage1;
 
-        cvGrayThreshNear.threshold(threshSlider1, true);
-        cvGrayThreshMid1.threshold(threshSlider1 - 4);
-        cvGrayThreshMid2.threshold(threshSlider1 - 5, true);
-        cvGrayThreshFar.threshold(threshSlider1 - 9);
-        cvAnd(cvGrayThreshNear.getCvImage(), cvGrayThreshMid1.getCvImage(), cvGrayImage1.getCvImage(), NULL);
-        cvAnd(cvGrayThreshMid2.getCvImage(), cvGrayThreshFar.getCvImage(), cvGrayImage2.getCvImage(), NULL);
+        // Create pairs of threshold images
+        cvGrayThresh1.threshold(threshSlider1, true);
+        cvGrayThresh1F.threshold(threshSlider1 - 2);
+        cvGrayThresh2.threshold(threshSlider2, true);
+        cvGrayThresh2F.threshold(threshSlider2 - 2);
+        cvGrayThresh3.threshold(threshSlider3, true);
+        cvGrayThresh3F.threshold(threshSlider3 -2);
+        cvGrayThresh4.threshold(threshSlider4, true);
+        cvGrayThresh4F.threshold(threshSlider4 - 2);
+        cvGrayThresh5.threshold(threshSlider5, true);
+        cvGrayThresh5F.threshold(threshSlider5 - 2);
+        cvGrayThresh6.threshold(threshSlider6, true);
+        cvGrayThresh6F.threshold(threshSlider6 - 2);
 
-        // allocate ofImg, set ofImg from cvImg, crop ofImg, change to cvimage
-        if(corners.size() == 2){
-//            selectedImg.allocate(kinect.width, kinect.height);
-//            selectedImg.setFromPixels(kinect.getPixels(), kinect.width, kinect.height, OF_IMAGE_COLOR);
-//            selectedImg.crop(corners[0].x, corners[0].y, corners[1].x - corners[0].x, corners[1].y - corners[0].y);
-            // Near Image
-            selectedNearImg.allocate(cvGrayImage1.width, cvGrayImage1.height, OF_IMAGE_GRAYSCALE);
-            selectedNearImg.setFromPixels(cvGrayImage1.getPixels(), cvGrayImage1.width, cvGrayImage1.height, OF_IMAGE_GRAYSCALE);
-            selectedNearImg.crop(corners[0].x, corners[0].y, corners[1].x - corners[0].x, corners[1].y - corners[0].y);
-            cvSelectedNearImg.setFromPixels(selectedNearImg.getPixels(), corners[1].x - corners[0].x, corners[1].y - corners[0].y);
-            // Far Image
-            selectedFarImg.allocate(cvGrayImage2.width, cvGrayImage2.height, OF_IMAGE_GRAYSCALE);
-            selectedFarImg.setFromPixels(cvGrayImage2.getPixels(), cvGrayImage2.width, cvGrayImage2.height, OF_IMAGE_GRAYSCALE);
-            selectedFarImg.crop(corners[0].x, corners[0].y, corners[1].x - corners[0].x, corners[1].y - corners[0].y);
-            cvSelectedFarImg.setFromPixels(selectedFarImg.getPixels(), corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+        // Find similarities between a pair of images
+        cvAnd(cvGrayThresh1.getCvImage(), cvGrayThresh1F.getCvImage(), cvGrayImage1.getCvImage(), NULL);
+        cvAnd(cvGrayThresh2.getCvImage(), cvGrayThresh2F.getCvImage(), cvGrayImage2.getCvImage(), NULL);
+        cvAnd(cvGrayThresh3.getCvImage(), cvGrayThresh3F.getCvImage(), cvGrayImage3.getCvImage(), NULL);
+        cvAnd(cvGrayThresh4.getCvImage(), cvGrayThresh4F.getCvImage(), cvGrayImage4.getCvImage(), NULL);
+        cvAnd(cvGrayThresh5.getCvImage(), cvGrayThresh5F.getCvImage(), cvGrayImage5.getCvImage(), NULL);
+        cvAnd(cvGrayThresh6.getCvImage(), cvGrayThresh6F.getCvImage(), cvGrayImage6.getCvImage(), NULL);
 
-//            cvSubtractedImg.allocate(cvSelectedFarImg.getWidth(), cvSelectedFarImg.getHeight());
-//            cvSubtractedImg.absDiff(cvSelectedNearImg, cvSelectedFarImg);
-
-            cvSelectedNearImg.dilate_3x3();
-
-            // find contours which are between the size of 20 pixels and 1/3 the w*h pixels.
-            // also, find holes is set to true so we will get interior contours as well....
-            contourFinder1.findContours(cvSelectedNearImg, minSizeSlider, maxSizeSlider, 2, false);
-            contourFinder2.findContours(cvSelectedFarImg, minSizeSlider, maxSizeSlider, 2, false);
-//            contourFinder3.findContours(cvSubtractedImg, minSizeSlider, maxSizeSlider, 2, false);
-
-            for(vector<ofxCvBlob>::iterator blob_it = contourFinder2.blobs.begin(); blob_it != contourFinder2.blobs.end(); blob_it++){
-                centroid = blob_it->centroid;
-                gesture_lines.push_back(ofPoint(centroid.x, centroid.y));
+        // allocate and load each selected image
+        if(corners.size() >= 2){
+            selectedImg1.allocate(cvGrayImage1.width, cvGrayImage1.height, OF_IMAGE_GRAYSCALE);
+            selectedImg1.setFromPixels(cvGrayImage1.getPixels(), cvGrayImage1.width, cvGrayImage1.height, OF_IMAGE_GRAYSCALE);
+            selectedImg1.crop(corners[0].x, corners[0].y, corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+            cvSelectedImg1.setFromPixels(selectedImg1.getPixels(), corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+            contourFinder1.findContours(cvSelectedImg1, minSizeSlider, maxSizeSlider, 1, false);
+            if(contourFinder1.nBlobs == 1 && findWin){
+                system("xdotool search 'Web Page -- Home --' windowactivate");
             }
+
+            if(corners.size() >= 4){
+                selectedImg2.allocate(cvGrayImage2.width, cvGrayImage2.height, OF_IMAGE_GRAYSCALE);
+                selectedImg2.setFromPixels(cvGrayImage2.getPixels(), cvGrayImage2.width, cvGrayImage2.height, OF_IMAGE_GRAYSCALE);
+                selectedImg2.crop(corners[2].x, corners[2].y, corners[3].x - corners[2].x, corners[3].y - corners[2].y);
+                cvSelectedImg2.setFromPixels(selectedImg2.getPixels(), corners[3].x - corners[2].x, corners[3].y - corners[2].y);
+                contourFinder2.findContours(cvSelectedImg2, minSizeSlider, maxSizeSlider, 2, false);
+                if(contourFinder2.nBlobs == 1 && findWin){
+                    system("xdotool search 'Web Page -- Python --' windowactivate");
+                }
+
+                if(corners.size() >= 6){
+                    selectedImg3.allocate(cvGrayImage3.width, cvGrayImage3.height, OF_IMAGE_GRAYSCALE);
+                    selectedImg3.setFromPixels(cvGrayImage3.getPixels(), cvGrayImage3.width, cvGrayImage3.height, OF_IMAGE_GRAYSCALE);
+                    selectedImg3.crop(corners[4].x, corners[4].y, corners[5].x - corners[4].x, corners[5].y - corners[4].y);
+                    cvSelectedImg3.setFromPixels(selectedImg3.getPixels(), corners[5].x - corners[4].x, corners[5].y - corners[4].y);
+                    contourFinder3.findContours(cvSelectedImg3, minSizeSlider, maxSizeSlider, 2, false);
+                    if(contourFinder3.nBlobs == 1 && findWin){
+                        system("xdotool search 'Web Page -- Cpp --' windowactivate");
+                    }
+
+                    if(corners.size() >= 8){
+                        selectedImg4.allocate(cvGrayImage4.width, cvGrayImage4.height, OF_IMAGE_GRAYSCALE);
+                        selectedImg4.setFromPixels(cvGrayImage4.getPixels(), cvGrayImage4.width, cvGrayImage4.height, OF_IMAGE_GRAYSCALE);
+                        selectedImg4.crop(corners[6].x, corners[6].y, corners[7].x - corners[6].x, corners[7].y - corners[6].y);
+                        cvSelectedImg4.setFromPixels(selectedImg4.getPixels(), corners[7].x - corners[6].x, corners[7].y - corners[6].y);
+                        contourFinder4.findContours(cvSelectedImg4, minSizeSlider, maxSizeSlider, 2, false);
+                        if(contourFinder4.nBlobs == 1 && findWin){
+                            system("xdotool search 'Web Page -- Contact --' windowactivate");
+                        }
+
+                        if(corners.size() >= 10){
+                            selectedImg5.allocate(cvGrayImage5.width, cvGrayImage5.height, OF_IMAGE_GRAYSCALE);
+                            selectedImg5.setFromPixels(cvGrayImage5.getPixels(), cvGrayImage5.width, cvGrayImage5.height, OF_IMAGE_GRAYSCALE);
+                            selectedImg5.crop(corners[8].x, corners[8].y, corners[9].x - corners[8].x, corners[9].y - corners[8].y);
+                            cvSelectedImg5.setFromPixels(selectedImg5.getPixels(), corners[9].x - corners[8].x, corners[9].y - corners[8].y);
+                            contourFinder5.findContours(cvSelectedImg5, minSizeSlider, maxSizeSlider, 2, false);
+                            if(contourFinder5.nBlobs == 1 && findWin){
+                                system("xdotool search 'Web Page -- Java --' windowactivate");
+                            }
+
+                            if(corners.size() == 12){
+                                selectedImg6.allocate(cvGrayImage6.width, cvGrayImage6.height, OF_IMAGE_GRAYSCALE);
+                                selectedImg6.setFromPixels(cvGrayImage6.getPixels(), cvGrayImage6.width, cvGrayImage6.height, OF_IMAGE_GRAYSCALE);
+                                selectedImg6.crop(corners[10].x, corners[10].y, corners[11].x - corners[10].x, corners[11].y - corners[10].y);
+                                cvSelectedImg6.setFromPixels(selectedImg6.getPixels(), corners[11].x - corners[10].x, corners[11].y - corners[10].y);
+                                contourFinder6.findContours(cvSelectedImg6, minSizeSlider, maxSizeSlider, 2, false);
+                                if(contourFinder6.nBlobs == 1 && findWin){
+                                    system("xdotool search 'Web Page -- Android --' windowactivate");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+//            cvSelectedImg1.dilate_3x3();
+//            cvSelectedImg2.dilate_3x3();
+//            cvSelectedImg3.dilate_3x3();
         }
 
 		// update the cv images
 		cvGrayImage1.flagImageChanged();
-		cvGrayImage2.flagImageChanged();
-        // Dilate
-//        grayImage1.dilate_3x3();
-//        grayImage2.dilate_3x3();
 	}
 }
 
@@ -119,26 +189,35 @@ void testApp::draw() {
 		easyCam.end();
 	} else {
 		// draw from the live kinect
-		cvGrayImage1.draw(0, 0);
-        cvGrayImage2.draw(kinect.width, 0);
-//        kinect.draw(kinect.width, kinect.height);
-//		  kinect.drawDepth(kinect.width, 0, 400, 300);
+        kinect.draw(0, 0);
 
-		// if two points are selected, draw a rectangle
-        if(corners.size() == 2){
-            ofNoFill();
-            ofRect(corners[0].x, corners[0].y, corners[1].x - corners[0].x, corners[1].y - corners[0].y);
-            cvSelectedNearImg.draw(0, kinect.height);
-            cvSelectedFarImg.draw(cvSelectedNearImg.width, kinect.height);
-            cvSubtractedImg.draw(cvSelectedNearImg.width * 2, kinect.height);
-            contourFinder1.draw(0, kinect.height);
-            contourFinder2.draw(cvSelectedNearImg.width, kinect.height);
-//            contourFinder3.draw(cvSelectedNearImg.width * 2, kinect.height);
-            if(gesture_lines.size() > 0){
-                for(vector<ofPoint>::iterator blob_it = gesture_lines.begin(); blob_it != gesture_lines.end(); blob_it++){
-                    ofSetColor(0, 255, 255);
-                    ofFill();
-                    ofCircle(blob_it->x + cvSelectedNearImg.width, blob_it->y + kinect.height, 10);
+		// Check if ok to draw
+		if(drawSel){
+		// if a pair of points are selected, draw a rectangle and the corresponding image
+            if(corners.size() >= 2){
+                ofNoFill();
+                ofRect(corners[0].x, corners[0].y, corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+                cvSelectedImg1.draw(corners[0].x, corners[0].y);
+//              contourFinder1.draw(0, kinect.height + 5);
+                if(corners.size() >= 4){
+                    ofRect(corners[2].x, corners[2].y, corners[3].x - corners[2].x, corners[3].y - corners[2].y);
+                    cvSelectedImg2.draw(corners[2].x, corners[2].y);
+                    if(corners.size() >= 6){
+                        ofRect(corners[4].x, corners[4].y, corners[5].x - corners[4].x, corners[5].y - corners[4].y);
+                        cvSelectedImg3.draw(corners[4].x, corners[4].y);
+                        if(corners.size() >= 8){
+                            ofRect(corners[6].x, corners[6].y, corners[7].x - corners[6].x, corners[7].y - corners[6].y);
+                            cvSelectedImg4.draw(corners[6].x, corners[6].y);
+                            if(corners.size() >= 10){
+                                ofRect(corners[8].x, corners[8].y, corners[9].x - corners[8].x, corners[9].y - corners[8].y);
+                                cvSelectedImg5.draw(corners[8].x, corners[8].y);
+                                if(corners.size() == 12){
+                                    ofRect(corners[10].x, corners[10].y, corners[11].x - corners[10].x, corners[11].y - corners[10].y);
+                                    cvSelectedImg6.draw(corners[10].x, corners[10].y);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -190,9 +269,17 @@ void testApp::exit() {
 void testApp::keyPressed (int key) {
 	switch (key) {
 
-        case'r':
-            getNewBg = true; // get new background image
+        case' ':
+            gesture_lines.clear();
             break;
+
+        case's':
+			findWin = !findWin; // begin or halt window switch
+			break;
+
+        case'd':
+			drawSel = !drawSel; // begin or halt drawing selections
+			break;
 
 		case'p':
 			bDrawPointCloud = !bDrawPointCloud; // Draw the pointcloud
@@ -230,14 +317,12 @@ void testApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void testApp::mousePressed(int x, int y, int button){
     if(button == 0){
-        if(corners.size() != 2)
+        if(corners.size() < 12)
             corners.push_back(ofVec2f(x, y));
-        else if(corners.size() == 2){
-            // rect = ofRectangle(corners[0].x, corners[0].y, corners[1].x - corners[0].x, corners[1].y - corners[0].y);
-        }
     }
     else{
-        corners.clear();
+        if(corners.size() > 0)
+            corners.pop_back();
     }
 }
 

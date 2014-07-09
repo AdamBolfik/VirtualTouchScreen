@@ -376,7 +376,58 @@ obj/linux64/Release/src/testApp.o: src/testApp.cpp src/testApp.h \
  ../../../addons/ofxGui/src/ofxBaseGui.h \
  ../../../addons/ofxGui/src/ofxSlider.h \
  ../../../addons/ofxGui/src/ofxButton.h \
- ../../../addons/ofxGui/src/ofxToggle.h
+ ../../../addons/ofxGui/src/ofxToggle.h \
+ ../../../addons/ofxBox2d/src/ofxBox2d.h \
+ ../../../addons/ofxBox2d/src/ofxBox2dUtils.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Box2D.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Common/b2Settings.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Common/b2Draw.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Common/b2Math.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Common/b2Timer.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Collision/Shapes/b2CircleShape.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Collision/Shapes/b2Shape.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Common/b2BlockAllocator.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Collision/b2Collision.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Collision/Shapes/b2EdgeShape.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Collision/Shapes/b2ChainShape.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Collision/Shapes/b2PolygonShape.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Collision/b2BroadPhase.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Collision/b2DynamicTree.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Common/b2GrowableStack.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Collision/b2Distance.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Collision/b2TimeOfImpact.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/b2Body.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/b2Fixture.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/b2WorldCallbacks.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/b2TimeStep.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/b2World.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Common/b2StackAllocator.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/b2ContactManager.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/Contacts/b2Contact.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2DistanceJoint.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2Joint.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2FrictionJoint.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2GearJoint.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2MotorJoint.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2MouseJoint.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2PrismaticJoint.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2PulleyJoint.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2RevoluteJoint.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2RopeJoint.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2WeldJoint.h \
+ ../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2WheelJoint.h \
+ ../../../addons/ofxBox2d/src/ofxBox2dPolygonUtils.h \
+ ../../../addons/ofxBox2d/libs/triangle/del_interface.hpp \
+ ../../../addons/ofxBox2d/libs/triangle/dpoint.hpp \
+ ../../../addons/ofxBox2d/libs/triangle/assert.hpp \
+ ../../../addons/ofxBox2d/src/ofxBox2dBaseShape.h \
+ ../../../addons/ofxBox2d/src/ofxBox2dCircle.h \
+ ../../../addons/ofxBox2d/src/ofxBox2dPolygon.h \
+ ../../../addons/ofxBox2d/src/ofxBox2dEdge.h \
+ ../../../addons/ofxBox2d/src/ofxBox2dRect.h \
+ ../../../addons/ofxBox2d/src/ofxBox2dJoint.h \
+ ../../../addons/ofxBox2d/src/ofxBox2dRender.h \
+ ../../../addons/ofxBox2d/src/ofxBox2dContactListener.h
 
 src/testApp.h:
 
@@ -1169,3 +1220,105 @@ src/testApp.h:
 ../../../addons/ofxGui/src/ofxButton.h:
 
 ../../../addons/ofxGui/src/ofxToggle.h:
+
+../../../addons/ofxBox2d/src/ofxBox2d.h:
+
+../../../addons/ofxBox2d/src/ofxBox2dUtils.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Box2D.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Common/b2Settings.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Common/b2Draw.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Common/b2Math.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Common/b2Timer.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Collision/Shapes/b2CircleShape.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Collision/Shapes/b2Shape.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Common/b2BlockAllocator.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Collision/b2Collision.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Collision/Shapes/b2EdgeShape.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Collision/Shapes/b2ChainShape.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Collision/Shapes/b2PolygonShape.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Collision/b2BroadPhase.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Collision/b2DynamicTree.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Common/b2GrowableStack.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Collision/b2Distance.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Collision/b2TimeOfImpact.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/b2Body.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/b2Fixture.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/b2WorldCallbacks.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/b2TimeStep.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/b2World.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Common/b2StackAllocator.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/b2ContactManager.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/Contacts/b2Contact.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2DistanceJoint.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2Joint.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2FrictionJoint.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2GearJoint.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2MotorJoint.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2MouseJoint.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2PrismaticJoint.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2PulleyJoint.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2RevoluteJoint.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2RopeJoint.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2WeldJoint.h:
+
+../../../addons/ofxBox2d/libs/Box2D/Dynamics/Joints/b2WheelJoint.h:
+
+../../../addons/ofxBox2d/src/ofxBox2dPolygonUtils.h:
+
+../../../addons/ofxBox2d/libs/triangle/del_interface.hpp:
+
+../../../addons/ofxBox2d/libs/triangle/dpoint.hpp:
+
+../../../addons/ofxBox2d/libs/triangle/assert.hpp:
+
+../../../addons/ofxBox2d/src/ofxBox2dBaseShape.h:
+
+../../../addons/ofxBox2d/src/ofxBox2dCircle.h:
+
+../../../addons/ofxBox2d/src/ofxBox2dPolygon.h:
+
+../../../addons/ofxBox2d/src/ofxBox2dEdge.h:
+
+../../../addons/ofxBox2d/src/ofxBox2dRect.h:
+
+../../../addons/ofxBox2d/src/ofxBox2dJoint.h:
+
+../../../addons/ofxBox2d/src/ofxBox2dRender.h:
+
+../../../addons/ofxBox2d/src/ofxBox2dContactListener.h:
